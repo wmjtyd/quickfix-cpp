@@ -85,7 +85,7 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">tradeclient</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\examples\tradeclient-apifiny\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\examples\tradeclient-apifiny\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
