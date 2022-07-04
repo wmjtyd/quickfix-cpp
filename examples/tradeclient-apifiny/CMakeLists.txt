@@ -3,7 +3,7 @@ set(applink_SOURCE ${OPENSSL_INCLUDE_DIR}/openssl/applink.c)
 endif()
 
 
-link_libraries(libssl.a libcrypto.a libssl.so.1.1)
+link_libraries(libssl.a libcrypto.a)
 add_executable(tradeclient-apifiny Application.cpp tradeclient.cpp ${applink_SOURCE})
 TARGET_LINK_LIBRARIES(tradeclient-apifiny dl)
 #link_directories(${CMAKE_SOURCE_DIR}/examples/tradeclient/lib/openssl/lib/MinGW)
