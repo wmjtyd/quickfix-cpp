@@ -89,18 +89,18 @@ private:
   void fromApp( const FIX::Message& message, const FIX::SessionID& sessionID )
   EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType );
 
-  void onMessage( const FIX40::ExecutionReport&, const FIX::SessionID& );
+  /*void onMessage( const FIX40::ExecutionReport&, const FIX::SessionID& );
   void onMessage( const FIX40::OrderCancelReject&, const FIX::SessionID& );
   void onMessage( const FIX41::ExecutionReport&, const FIX::SessionID& );
-  void onMessage( const FIX41::OrderCancelReject&, const FIX::SessionID& );
+  void onMessage( const FIX41::OrderCancelReject&, const FIX::SessionID& );*/
   void onMessage( const FIX42::ExecutionReport&, const FIX::SessionID& );
   void onMessage( const FIX42::OrderCancelReject&, const FIX::SessionID& );
-  void onMessage( const FIX43::ExecutionReport&, const FIX::SessionID& );
-  void onMessage( const FIX43::OrderCancelReject&, const FIX::SessionID& );
-  void onMessage( const FIX44::ExecutionReport&, const FIX::SessionID& );
-  void onMessage( const FIX44::OrderCancelReject&, const FIX::SessionID& );
-  void onMessage( const FIX50::ExecutionReport&, const FIX::SessionID& );
-  void onMessage( const FIX50::OrderCancelReject&, const FIX::SessionID& );
+    /*void onMessage( const FIX43::ExecutionReport&, const FIX::SessionID& );
+    void onMessage( const FIX43::OrderCancelReject&, const FIX::SessionID& );
+    void onMessage( const FIX44::ExecutionReport&, const FIX::SessionID& );
+    void onMessage( const FIX44::OrderCancelReject&, const FIX::SessionID& );
+    void onMessage( const FIX50::ExecutionReport&, const FIX::SessionID& );
+    void onMessage( const FIX50::OrderCancelReject&, const FIX::SessionID& );*/
 
   void queryEnterOrder();
   void queryCancelOrder();
@@ -147,6 +147,10 @@ private:
   FIX::Price queryPrice();
   FIX::StopPx queryStopPx();
   FIX::TimeInForce queryTimeInForce();
+
+  void NewOrderSingle();
+  void CancelOrder();
+
 };
 
 #endif
