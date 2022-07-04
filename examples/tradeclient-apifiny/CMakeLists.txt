@@ -20,11 +20,11 @@ target_link_libraries(tradeclient-apifiny ${PROJECT_NAME})
 
 if (NOT WIN32)
 ADD_CUSTOM_TARGET(tradeclient-apifiny_target ALL
-                  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:tradeclient> ${CMAKE_SOURCE_DIR}/bin/tradeclient)
+                  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:tradeclient-apifiny> ${CMAKE_SOURCE_DIR}/bin/tradeclient-apifiny)
 else()
 set_target_properties(tradeclient-apifiny PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/debug/tradeclient/
-                      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/release/tradeclient/
-                      RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_SOURCE_DIR}/bin/release/tradeclient/)
+                      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/debug/tradeclient-apifiny/
+                      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/release/tradeclient-apifiny/
+                      RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_SOURCE_DIR}/bin/release/tradeclient-apifiny/)
 endif()    
 

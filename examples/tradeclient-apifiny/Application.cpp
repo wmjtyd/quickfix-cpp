@@ -341,11 +341,11 @@ void Application::CancelOrder()
     //    58	Text	Free format text string
 
     FIX42::OrderCancelRequest orderCancelRequest();
-    newOrderSingle.set(FIX::ClOrdID("ClOrdID"));
-    newOrderSingle.set(FIX::Account(ACCOUNT_ID));
-    newOrderSingle.set(FIX::SecurityExchange(VENUE));
-
-    FIX::Session::sendToTarget( newOrderSingle );
+//  TODO   newOrderSingle.set(FIX::ClOrdID("ClOrdID"));
+//    newOrderSingle.set(FIX::Account(ACCOUNT_ID));
+//    newOrderSingle.set(FIX::SecurityExchange(VENUE));
+//
+//    FIX::Session::sendToTarget( newOrderSingle );
 }
 
 void Application::queryHeader( FIX::Header& header )
