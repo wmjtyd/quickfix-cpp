@@ -27,36 +27,27 @@
 #undef min
 #define NOMINMAX 1
 #include "quickfix/config.h"
-
 #include "Application.h"
 #include "quickfix/Session.h"
-
 //#include <jwt-cpp/jwt.h>
 #include "jwt/jwt.hpp"
-
 #include <picojson/picojson.h>
 #include <iostream>
 #include <openssl/sha.h>
-
 #include <random>
-
-
 
 //config
 std::string ACCOUNT_ID = "";
 std::string SECRET_KEY_ID = "";
 std::string SECRET_KEY = "";
 std::string SYMBOL = "BTCUSDT";
-std::string VENUE = "GBBO";  // choose exchange you want to trade
-
+std::string VENUE = "FIX";  // choose exchange you want to trade
 std::string SERVER = "fix.api.apifiny.com:1443";  //#use the right endpoint for each exchange
-
 std::string SenderCompID = ACCOUNT_ID;
 std::string TargetCompID = "APIFINY";
 
 //const std::string __SOH__2 = "";
 const std::string __SOH__ = std::string("\x01");
-
 void replace_str(std::string& str, const std::string& before, const std::string& after)
 {
     for (std::string::size_type pos(0); pos != std::string::npos; pos += after.length())
@@ -84,8 +75,6 @@ std::string sha256(const std::string str)
     }
     return ss.str();
 }
-
-
 
 std::string getSignature(std::string method, 
                          std::string account_id, 
@@ -146,7 +135,6 @@ std::string getSignature(std::string method,
     //jwt::jwt_object obj{ algorithm("HS256"), payload({{"some", "payload"}}), secret("secret")};
     
     auto token = enc_str;
-
     return token;
 }
 
@@ -161,10 +149,8 @@ static void split(const std::string& s, std::vector<std::string>& tokens, const 
     }
 }
 
- 
 std::string generate_order_id(std::string accountId)
 {
-    
     std::vector<std::string> result;
     split(accountId, result, "-");
 
@@ -219,19 +205,15 @@ void Application::toAdmin( FIX::Message& message, const FIX::SessionID& sessionI
             secret_key_id,
             params,
             secret_key);
-
         message.setField(FIX::RawDataLength(signature.size()));
         message.setField(FIX::RawData(signature));
-
         //std::cout << "signature:" << signature << std::endl;
     }
-    
 
     std::string m = message.toString();
     replace_str(m, __SOH__, "|");
     //std::cout << std::endl
-    //    << "toAdmin: " << m << std::endl;
-
+    //<< "toAdmin: " << m << std::endl;
 }
 
 void Application::fromAdmin( const FIX::Message& message, const FIX::SessionID& sessionID)
@@ -242,9 +224,7 @@ EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FI
     std::string m = message.toString();
     replace_str(m, __SOH__, "|");
     std::cout << std::endl << "fromAdmin: " << m << std::endl;
-
 }
-
 
 void Application::fromApp( const FIX::Message& message, const FIX::SessionID& sessionID )
 EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType )
@@ -276,15 +256,6 @@ EXCEPT( FIX::DoNotSend )
 }
 
 void Application::onMessage
-( const FIX40::ExecutionReport&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX40::OrderCancelReject&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX41::ExecutionReport&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX41::OrderCancelReject&, const FIX::SessionID& ) {}
-
-void Application::onMessage
 ( const FIX42::ExecutionReport& executionReport, const FIX::SessionID& sessionId) 
 {
     std::cout << std::endl
@@ -292,21 +263,8 @@ void Application::onMessage
         << "onMessage: FIX42::ExecutionReport:" << executionReport << std::endl;
 }
 
-
 void Application::onMessage
 ( const FIX42::OrderCancelReject&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX43::ExecutionReport&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX43::OrderCancelReject&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX44::ExecutionReport&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX44::OrderCancelReject&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX50::ExecutionReport&, const FIX::SessionID& ) {}
-void Application::onMessage
-( const FIX50::OrderCancelReject&, const FIX::SessionID& ) {}
 
 void Application::run()
 {
@@ -315,19 +273,6 @@ void Application::run()
     try
     {
       char action = queryAction();
-
-      if ( action == '1' )
-        queryEnterOrder();
-      else if ( action == '2' )
-        queryCancelOrder();
-      else if ( action == '3' )
-        queryReplaceOrder();
-      else if ( action == '4' )
-        queryMarketDataRequest();
-      else if ( action == '5' )
-      	queryTestOrder();
-      else if ( action == '6' ) 
-        break;
     }
     catch ( std::exception & e )
     {
@@ -336,35 +281,8 @@ void Application::run()
   }
 }
 
-void Application::queryTestOrder()
+void Application::NewOrderSingle()
 {
-  /*int version = queryVersion();
-  std::cout << "\nNewOrderSingle\n";
-  FIX::Message order;
-
-  switch ( version ) {
-  case 40:
-    order = queryNewOrderSingle40();
-    break;
-  case 41:
-    order = queryNewOrderSingle41();
-    break;
-  case 42:
-    order = queryNewOrderSingle42();
-    break;
-  case 43:
-    order = queryNewOrderSingle43();
-    break;
-  case 44:
-    order = queryNewOrderSingle44();
-    break;
-  case 50:
-    order = queryNewOrderSingle50();
-    break;
-  default:
-    std::cerr << "No test for version " << version << std::endl;
-    break;
-  }*/
   auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::cout << "order utc:" << nowUtc << std::endl;
   //std::chrono::system_clock::now();
@@ -395,506 +313,39 @@ void Application::queryTestOrder()
   {
       newOrderSingle.set(queryStopPx());
   }
-    
 
   newOrderSingle.set(FIX::Account(ACCOUNT_ID));
   newOrderSingle.set(FIX::Text("new Order"));
 
   //queryHeader( newOrderSingle.getHeader() );
   FIX::Header& header = newOrderSingle.getHeader();
-    //std::string('APIFINY')
+  //std::string('APIFINY')
   header.setField( FIX::SenderCompID( ACCOUNT_ID ) );
   header.setField( FIX::TargetCompID(TargetCompID) );
   header.setField(FIX::SecurityExchange(VENUE));
   
   //header.setField( FIX::TargetSubID( value ) );
-  
   //return newOrderSingle;
-
   //if ( queryConfirm( "Send order" ) )
   FIX::Session::sendToTarget( newOrderSingle );
 }
 
-
-void Application::queryEnterOrder()
+void Application::CancelOrder()
 {
-  int version = queryVersion();
-  std::cout << "\nNewOrderSingle\n";
-  FIX::Message order;
-
-  switch ( version ) {
-  case 40:
-    order = queryNewOrderSingle40();
-    break;
-  case 41:
-    order = queryNewOrderSingle41();
-    break;
-  case 42:
-    order = queryNewOrderSingle42();
-    break;
-  case 43:
-    order = queryNewOrderSingle43();
-    break;
-  case 44:
-    order = queryNewOrderSingle44();
-    break;
-  case 50:
-    order = queryNewOrderSingle50();
-    break;
-  default:
-    std::cerr << "No test for version " << version << std::endl;
-    break;
-  }
-
-  if ( queryConfirm( "Send order" ) )
-    FIX::Session::sendToTarget( order );
-}
-
-void Application::queryCancelOrder()
-{
-  int version = queryVersion();
-  std::cout << "\nOrderCancelRequest\n";
-  FIX::Message cancel;
-
-  switch ( version ) {
-  case 40:
-    cancel = queryOrderCancelRequest40();
-    break;
-  case 41:
-    cancel = queryOrderCancelRequest41();
-    break;
-  case 42:
-    cancel = queryOrderCancelRequest42();
-    break;
-  case 43:
-    cancel = queryOrderCancelRequest43();
-    break;
-  case 44:
-    cancel = queryOrderCancelRequest44();
-    break;
-  case 50:
-    cancel = queryOrderCancelRequest50();
-    break;
-  default:
-    std::cerr << "No test for version " << version << std::endl;
-    break;
-  }
-
-  if ( queryConfirm( "Send cancel" ) )
-    FIX::Session::sendToTarget( cancel );
-}
-
-void Application::queryReplaceOrder()
-{
-  int version = queryVersion();
-  std::cout << "\nCancelReplaceRequest\n";
-  FIX::Message replace;
-
-  switch ( version ) {
-  case 40:
-    replace = queryCancelReplaceRequest40();
-    break;
-  case 41:
-    replace = queryCancelReplaceRequest41();
-    break;
-  case 42:
-    replace = queryCancelReplaceRequest42();
-    break;
-  case 43:
-    replace = queryCancelReplaceRequest43();
-    break;
-  case 44:
-    replace = queryCancelReplaceRequest44();
-    break;
-  case 50:
-    replace = queryCancelReplaceRequest50();
-    break;
-  default:
-    std::cerr << "No test for version " << version << std::endl;
-    break;
-  }
-
-  if ( queryConfirm( "Send replace" ) )
-    FIX::Session::sendToTarget( replace );
-}
-
-void Application::queryMarketDataRequest()
-{
-  int version = queryVersion();
-  std::cout << "\nMarketDataRequest\n";
-  FIX::Message md;
-
-  switch (version) {
-  case 43:
-    md = queryMarketDataRequest43();
-    break;
-  case 44:
-    md = queryMarketDataRequest44();
-    break;
-  case 50:
-    md = queryMarketDataRequest50();
-    break;
-  default:
-    std::cerr << "No test for version " << version << std::endl;
-    break;
-  }
-
-  FIX::Session::sendToTarget( md );
-}
-
-FIX40::NewOrderSingle Application::queryNewOrderSingle40()
-{
-  FIX::OrdType ordType;
-
-  FIX40::NewOrderSingle newOrderSingle(
-    queryClOrdID(), FIX::HandlInst( '1' ), querySymbol(), querySide(),
-    queryOrderQty(), ordType = queryOrdType() );
-
-  newOrderSingle.set( queryTimeInForce() );
-  if ( ordType == FIX::OrdType_LIMIT || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryPrice() );
-  if ( ordType == FIX::OrdType_STOP || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryStopPx() );
-
-  queryHeader( newOrderSingle.getHeader() );
-  return newOrderSingle;
-}
-
-FIX41::NewOrderSingle Application::queryNewOrderSingle41()
-{
-  FIX::OrdType ordType;
-
-  FIX41::NewOrderSingle newOrderSingle(
-    queryClOrdID(), FIX::HandlInst( '1' ), querySymbol(), querySide(),
-    ordType = queryOrdType() );
-
-  newOrderSingle.set( queryOrderQty() );
-  newOrderSingle.set( queryTimeInForce() );
-  if ( ordType == FIX::OrdType_LIMIT || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryPrice() );
-  if ( ordType == FIX::OrdType_STOP || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryStopPx() );
-
-  queryHeader( newOrderSingle.getHeader() );
-  return newOrderSingle;
-}
-
-FIX42::NewOrderSingle Application::queryNewOrderSingle42()
-{
-  FIX::OrdType ordType;
-
-  FIX42::NewOrderSingle newOrderSingle(
-    queryClOrdID(), FIX::HandlInst( '1' ), querySymbol(), querySide(),
-    FIX::TransactTime(), ordType = queryOrdType() );
-
-  newOrderSingle.set( queryOrderQty() );
-  newOrderSingle.set( queryTimeInForce() );
-  if ( ordType == FIX::OrdType_LIMIT || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryPrice() );
-  if ( ordType == FIX::OrdType_STOP || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryStopPx() );
-
-  queryHeader( newOrderSingle.getHeader() );
-  return newOrderSingle;
-}
-
-FIX43::NewOrderSingle Application::queryNewOrderSingle43()
-{
-  FIX::OrdType ordType;
-
-  FIX43::NewOrderSingle newOrderSingle(
-    queryClOrdID(), FIX::HandlInst( '1' ), querySide(),
-    FIX::TransactTime(), ordType = queryOrdType() );
-
-  newOrderSingle.set( querySymbol() );
-  newOrderSingle.set( queryOrderQty() );
-  newOrderSingle.set( queryTimeInForce() );
-  if ( ordType == FIX::OrdType_LIMIT || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryPrice() );
-  if ( ordType == FIX::OrdType_STOP || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryStopPx() );
-
-  queryHeader( newOrderSingle.getHeader() );
-  return newOrderSingle;
-}
-
-FIX44::NewOrderSingle Application::queryNewOrderSingle44()
-{
-  FIX::OrdType ordType;
-
-  FIX44::NewOrderSingle newOrderSingle(
-    queryClOrdID(), querySide(),
-    FIX::TransactTime(), ordType = queryOrdType() );
-
-  newOrderSingle.set( FIX::HandlInst('1') );
-  newOrderSingle.set( querySymbol() );
-  newOrderSingle.set( queryOrderQty() );
-  newOrderSingle.set( queryTimeInForce() );
-  if ( ordType == FIX::OrdType_LIMIT || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryPrice() );
-  if ( ordType == FIX::OrdType_STOP || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryStopPx() );
-
-  queryHeader( newOrderSingle.getHeader() );
-  return newOrderSingle;
-}
-
-FIX50::NewOrderSingle Application::queryNewOrderSingle50()
-{
-  FIX::OrdType ordType;
-
-  FIX50::NewOrderSingle newOrderSingle(
-    queryClOrdID(), querySide(),
-    FIX::TransactTime(), ordType = queryOrdType() );
-
-  newOrderSingle.set( FIX::HandlInst('1') );
-  newOrderSingle.set( querySymbol() );
-  newOrderSingle.set( queryOrderQty() );
-  newOrderSingle.set( queryTimeInForce() );
-  if ( ordType == FIX::OrdType_LIMIT || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryPrice() );
-  if ( ordType == FIX::OrdType_STOP || ordType == FIX::OrdType_STOP_LIMIT )
-    newOrderSingle.set( queryStopPx() );
-
-  queryHeader( newOrderSingle.getHeader() );
-  return newOrderSingle;
-}
-
-FIX40::OrderCancelRequest Application::queryOrderCancelRequest40()
-{
-  FIX40::OrderCancelRequest orderCancelRequest(
-    queryOrigClOrdID(), queryClOrdID(), FIX::CxlType( 'F' ),
-    querySymbol(), querySide(), queryOrderQty() );
-
-  queryHeader( orderCancelRequest.getHeader() );
-  return orderCancelRequest;
-}
-
-FIX41::OrderCancelRequest Application::queryOrderCancelRequest41()
-{
-  FIX41::OrderCancelRequest orderCancelRequest(
-    queryOrigClOrdID(), queryClOrdID(), querySymbol(), querySide() );
-
-  orderCancelRequest.set( queryOrderQty() );
-  queryHeader( orderCancelRequest.getHeader() );
-  return orderCancelRequest;
-}
-
-FIX42::OrderCancelRequest Application::queryOrderCancelRequest42()
-{
-  FIX42::OrderCancelRequest orderCancelRequest( queryOrigClOrdID(),
-      queryClOrdID(), querySymbol(), querySide(), FIX::TransactTime() );
-
-  orderCancelRequest.set( queryOrderQty() );
-  queryHeader( orderCancelRequest.getHeader() );
-  return orderCancelRequest;
-}
-
-FIX43::OrderCancelRequest Application::queryOrderCancelRequest43()
-{
-  FIX43::OrderCancelRequest orderCancelRequest( queryOrigClOrdID(),
-      queryClOrdID(), querySide(), FIX::TransactTime() );
-
-  orderCancelRequest.set( querySymbol() );
-  orderCancelRequest.set( queryOrderQty() );
-  queryHeader( orderCancelRequest.getHeader() );
-  return orderCancelRequest;
-}
-
-FIX44::OrderCancelRequest Application::queryOrderCancelRequest44()
-{
-  FIX44::OrderCancelRequest orderCancelRequest( queryOrigClOrdID(),
-      queryClOrdID(), querySide(), FIX::TransactTime() );
-
-  orderCancelRequest.set( querySymbol() );
-  orderCancelRequest.set( queryOrderQty() );
-  queryHeader( orderCancelRequest.getHeader() );
-  return orderCancelRequest;
-}
-
-FIX50::OrderCancelRequest Application::queryOrderCancelRequest50()
-{
-  FIX50::OrderCancelRequest orderCancelRequest( queryOrigClOrdID(),
-      queryClOrdID(), querySide(), FIX::TransactTime() );
-
-  orderCancelRequest.set( querySymbol() );
-  orderCancelRequest.set( queryOrderQty() );
-  queryHeader( orderCancelRequest.getHeader() );
-  return orderCancelRequest;
-}
-
-FIX40::OrderCancelReplaceRequest Application::queryCancelReplaceRequest40()
-{
-  FIX40::OrderCancelReplaceRequest cancelReplaceRequest(
-    queryOrigClOrdID(), queryClOrdID(), FIX::HandlInst( '1' ),
-    querySymbol(), querySide(), queryOrderQty(), queryOrdType() );
-
-  if ( queryConfirm( "New price" ) )
-    cancelReplaceRequest.set( queryPrice() );
-  if ( queryConfirm( "New quantity" ) )
-    cancelReplaceRequest.set( queryOrderQty() );
-
-  queryHeader( cancelReplaceRequest.getHeader() );
-  return cancelReplaceRequest;
-}
-
-FIX41::OrderCancelReplaceRequest Application::queryCancelReplaceRequest41()
-{
-  FIX41::OrderCancelReplaceRequest cancelReplaceRequest(
-    queryOrigClOrdID(), queryClOrdID(), FIX::HandlInst( '1' ),
-    querySymbol(), querySide(), queryOrdType() );
-
-  if ( queryConfirm( "New price" ) )
-    cancelReplaceRequest.set( queryPrice() );
-  if ( queryConfirm( "New quantity" ) )
-    cancelReplaceRequest.set( queryOrderQty() );
-
-  queryHeader( cancelReplaceRequest.getHeader() );
-  return cancelReplaceRequest;
-}
-
-FIX42::OrderCancelReplaceRequest Application::queryCancelReplaceRequest42()
-{
-  FIX42::OrderCancelReplaceRequest cancelReplaceRequest(
-    queryOrigClOrdID(), queryClOrdID(), FIX::HandlInst( '1' ),
-    querySymbol(), querySide(), FIX::TransactTime(), queryOrdType() );
-
-  if ( queryConfirm( "New price" ) )
-    cancelReplaceRequest.set( queryPrice() );
-  if ( queryConfirm( "New quantity" ) )
-    cancelReplaceRequest.set( queryOrderQty() );
-
-  queryHeader( cancelReplaceRequest.getHeader() );
-  return cancelReplaceRequest;
-}
-
-FIX43::OrderCancelReplaceRequest Application::queryCancelReplaceRequest43()
-{
-  FIX43::OrderCancelReplaceRequest cancelReplaceRequest(
-    queryOrigClOrdID(), queryClOrdID(), FIX::HandlInst( '1' ),
-    querySide(), FIX::TransactTime(), queryOrdType() );
-
-  cancelReplaceRequest.set( querySymbol() );
-  if ( queryConfirm( "New price" ) )
-    cancelReplaceRequest.set( queryPrice() );
-  if ( queryConfirm( "New quantity" ) )
-    cancelReplaceRequest.set( queryOrderQty() );
-
-  queryHeader( cancelReplaceRequest.getHeader() );
-  return cancelReplaceRequest;
-}
-
-FIX44::OrderCancelReplaceRequest Application::queryCancelReplaceRequest44()
-{
-  FIX44::OrderCancelReplaceRequest cancelReplaceRequest(
-    queryOrigClOrdID(), queryClOrdID(),
-    querySide(), FIX::TransactTime(), queryOrdType() );
-
-  cancelReplaceRequest.set( FIX::HandlInst('1') );
-  cancelReplaceRequest.set( querySymbol() );
-  if ( queryConfirm( "New price" ) )
-    cancelReplaceRequest.set( queryPrice() );
-  if ( queryConfirm( "New quantity" ) )
-    cancelReplaceRequest.set( queryOrderQty() );
-
-  queryHeader( cancelReplaceRequest.getHeader() );
-  return cancelReplaceRequest;
-}
-
-FIX50::OrderCancelReplaceRequest Application::queryCancelReplaceRequest50()
-{
-  FIX50::OrderCancelReplaceRequest cancelReplaceRequest(
-    queryOrigClOrdID(), queryClOrdID(),
-    querySide(), FIX::TransactTime(), queryOrdType() );
-
-  cancelReplaceRequest.set( FIX::HandlInst('1') );
-  cancelReplaceRequest.set( querySymbol() );
-  if ( queryConfirm( "New price" ) )
-    cancelReplaceRequest.set( queryPrice() );
-  if ( queryConfirm( "New quantity" ) )
-    cancelReplaceRequest.set( queryOrderQty() );
-
-  queryHeader( cancelReplaceRequest.getHeader() );
-  return cancelReplaceRequest;
-}
-
-
-FIX43::MarketDataRequest Application::queryMarketDataRequest43()
-{
-  FIX::MDReqID mdReqID( "MARKETDATAID" );
-  FIX::SubscriptionRequestType subType( FIX::SubscriptionRequestType_SNAPSHOT );
-  FIX::MarketDepth marketDepth( 0 );
-
-  FIX43::MarketDataRequest::NoMDEntryTypes marketDataEntryGroup;
-  FIX::MDEntryType mdEntryType( FIX::MDEntryType_BID );
-  marketDataEntryGroup.set( mdEntryType );
-
-  FIX43::MarketDataRequest::NoRelatedSym symbolGroup;
-  FIX::Symbol symbol( "LNUX" );
-  symbolGroup.set( symbol );
-
-  FIX43::MarketDataRequest message( mdReqID, subType, marketDepth );
-  message.addGroup( marketDataEntryGroup );
-  message.addGroup( symbolGroup );
-
-  queryHeader( message.getHeader() );
-
-  std::cout << message.toXML() << std::endl;
-  std::cout << message.toString() << std::endl;
-
-  return message;
-}
-
-FIX44::MarketDataRequest Application::queryMarketDataRequest44()
-{
-  FIX::MDReqID mdReqID( "MARKETDATAID" );
-  FIX::SubscriptionRequestType subType( FIX::SubscriptionRequestType_SNAPSHOT );
-  FIX::MarketDepth marketDepth( 0 );
-
-  FIX44::MarketDataRequest::NoMDEntryTypes marketDataEntryGroup;
-  FIX::MDEntryType mdEntryType( FIX::MDEntryType_BID );
-  marketDataEntryGroup.set( mdEntryType );
-
-  FIX44::MarketDataRequest::NoRelatedSym symbolGroup;
-  FIX::Symbol symbol( "LNUX" );
-  symbolGroup.set( symbol );
-
-  FIX44::MarketDataRequest message( mdReqID, subType, marketDepth );
-  message.addGroup( marketDataEntryGroup );
-  message.addGroup( symbolGroup );
-
-  queryHeader( message.getHeader() );
-
-  std::cout << message.toXML() << std::endl;
-  std::cout << message.toString() << std::endl;
-
-  return message;
-}
-
-FIX50::MarketDataRequest Application::queryMarketDataRequest50()
-{
-  FIX::MDReqID mdReqID( "MARKETDATAID" );
-  FIX::SubscriptionRequestType subType( FIX::SubscriptionRequestType_SNAPSHOT );
-  FIX::MarketDepth marketDepth( 0 );
-
-  FIX50::MarketDataRequest::NoMDEntryTypes marketDataEntryGroup;
-  FIX::MDEntryType mdEntryType( FIX::MDEntryType_BID );
-  marketDataEntryGroup.set( mdEntryType );
-
-  FIX50::MarketDataRequest::NoRelatedSym symbolGroup;
-  FIX::Symbol symbol( "LNUX" );
-  symbolGroup.set( symbol );
-
-  FIX50::MarketDataRequest message( mdReqID, subType, marketDepth );
-  message.addGroup( marketDataEntryGroup );
-  message.addGroup( symbolGroup );
-
-  queryHeader( message.getHeader() );
-
-  std::cout << message.toXML() << std::endl;
-  std::cout << message.toString() << std::endl;
-
-  return message;
+    auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::cout << "order utc:" << nowUtc << std::endl;
+
+    //    11	ClOrdID	Only present on order acknowledgements, ExecType=New (150=0)
+    //    1	    Account	account id
+    //    207	SecurityExchange	VENUE
+    //    58	Text	Free format text string
+
+    FIX42::OrderCancelRequest orderCancelRequest();
+    newOrderSingle.set(FIX::ClOrdID("ClOrdID"));
+    newOrderSingle.set(FIX::Account(ACCOUNT_ID));
+    newOrderSingle.set(FIX::SecurityExchange(VENUE));
+
+    FIX::Session::sendToTarget( newOrderSingle );
 }
 
 void Application::queryHeader( FIX::Header& header )
