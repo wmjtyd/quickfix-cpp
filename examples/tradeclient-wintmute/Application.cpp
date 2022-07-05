@@ -28,9 +28,10 @@
 #include "quickfix/config.h"
 #include "Application.h"
 #include "quickfix/Session.h"
-#include <picojson/picojson.h>
+//#include <picojson/picojson.h>
 #include <iostream>
 #include <random>
+#include <chrono>
 
 //const std::string __SOH__2 = "";
 const std::string __SOH__ = std::string("\x01");
@@ -144,7 +145,9 @@ void Application::onMessage
 void Application::onMessage
 ( const FIX44::MarketDataSnapshotFullRefresh&, const FIX::SessionID& ) {}
 // ExecutionReport
-( const FIX44::ExecutionReport&, const FIX::SessionID& ) {
+
+void Application::onMessage
+( const FIX44::ExecutionReport& sessionId, const FIX::SessionID& executionReport) {
     std::cout << std::endl
     << "onMessage: FIX::SessionID:" << sessionId << std::endl
     << "onMessage: FIX42::ExecutionReport:" << executionReport << std::endl;
@@ -156,8 +159,8 @@ void Application::onMessage
 void Application::onMessage
 ( const FIX44::PositionReport&, const FIX::SessionID& ) {}
 // SecurityList
-void Application::onMessage
-( const FIX50::OrderCancelReject&, const FIX::SessionID& ) {}
+/*void Application::onMessage
+( const FIX50::OrderCancelReject&, const FIX::SessionID& ) {}*/
 
 void Application::run()
 {
@@ -382,9 +385,9 @@ void Application::put_quote(FIX::Symbol symbol, FIX::Currency currency, FIX::Sid
 {
     FIX44::QuoteRequest quoteRequest;
     quoteRequest.set( FIX::QuoteReqID("QuoteReqID") ); // String (max length 31 chars) Unique ID provided by the client [a-zA-Z0-9._-]
-    quoteRequest.set( FIX::Symbol( symbol ) );
+    /*quoteRequest.set( FIX::Symbol( symbol ) );
     quoteRequest.set( FIX::Side( FIX::Side_BUY ) );
-    quoteRequest.set( FIX::OrderQty( 1 ) );
+    quoteRequest.set( FIX::OrderQty( 1 ) );*/
 
     FIX::Session::sendToTarget( quoteRequest );
 }
@@ -431,7 +434,7 @@ void Application::put_subscribe(FIX::Symbol symbol, bool subscribe)
 
     FIX44::MarketDataRequest marketDataRequest;
     marketDataRequest.set( FIX::MDReqID( "MDReqID" ) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-]
-    marketDataRequest.set( symbol );
+    // TODO DENGJIN marketDataRequest.set( symbol );
     if (subscribe == true){
         marketDataRequest.set(FIX::SubscriptionRequestType('1'));
     } else {
@@ -453,9 +456,9 @@ void Application::put_position(FIX::Currency currency, bool zeroPositions, bool 
     FIX44::RequestForPositions requestForPositions;
     requestForPositions.set( FIX::PosReqID( "PosReqID" ) ); // String (max 15 chars) ID provided by the client in position request message
     requestForPositions.set( currency );
-    requestForPositions.set( FIX::SubscriptionRequestType('1') if subscribe else FIX::SubscriptionRequestType('0') );
-    requestForPositions.set( FIX::BoolField(100551, zeroPositions));
-    FIX::Session::sendToTarget( requestForPositions );
+    requestForPositions.set( FIX::SubscriptionRequestType('1')); // if subscribe else FIX::SubscriptionRequestType('0') );
+//    requestForPositions.set( FIX::BoolField(100551, zeroPositions));
+//    FIX::Session::sendToTarget( requestForPositions );
 }
 
 // def put_security(self, symbol:str):
