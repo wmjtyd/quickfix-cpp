@@ -259,7 +259,7 @@ void Application::onMessage
 ( const FIX42::ExecutionReport& executionReport, const FIX::SessionID& sessionId) 
 {
     // auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto millisec_since_epoch = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto millisec_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << std::endl
         << "ExecutionReport utc:" << millisec_since_epoch << std::endl
         << "onMessage: FIX::SessionID:" << sessionId << std::endl
@@ -297,7 +297,7 @@ void Application::run()
 void Application::NewOrderSingle()
 {
   // auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  auto millisec_since_epoch = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  auto millisec_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
   std::cout << "order utc:" << millisec_since_epoch << std::endl;
   //std::chrono::system_clock::now();
   //FIX::DateTime();
