@@ -28,22 +28,9 @@
 #include "quickfix/config.h"
 #include "Application.h"
 #include "quickfix/Session.h"
-//#include <jwt-cpp/jwt.h>
-#include "jwt/jwt.hpp"
 #include <picojson/picojson.h>
 #include <iostream>
-#include <openssl/sha.h>
 #include <random>
-
-//config
-std::string ACCOUNT_ID = "";
-std::string SECRET_KEY_ID = "";
-std::string SECRET_KEY = "";
-std::string SYMBOL = "BTCUSDT";
-std::string VENUE = "GBBO";  // choose exchange you want to trade
-std::string SERVER = "fix.api.apifiny.com:1443";  //#use the right endpoint for each exchange
-std::string SenderCompID = ACCOUNT_ID;
-std::string TargetCompID = "APIFINY";
 
 //const std::string __SOH__2 = "";
 const std::string __SOH__ = std::string("\x01");
@@ -58,118 +45,6 @@ void replace_str(std::string& str, const std::string& before, const std::string&
         else
             break;
     }
-}
-
-std::string sha256(const std::string str)
-{
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, str.c_str(), str.size());
-    SHA256_Final(hash, &sha256);
-    std::stringstream ss;
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-    {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-    }
-    return ss.str();
-}
-
-std::string getSignature(std::string method, 
-                         std::string account_id, 
-                         std::string secret_key_id,
-                         std::string params, 
-                         std::string secret_key) {
-    /*std::cout << "c++:" << std::endl;
-    std::cout << "method:" << method << std::endl;
-    std::cout << "account_id:" << account_id << std::endl;
-    std::cout << "secret_key_id:" << secret_key_id << std::endl;
-    std::cout << "params:" << params << std::endl;
-    std::cout << "secret_key:" << secret_key << std::endl;*/
-    
-    auto digest = sha256(params);
-    //std::cout << "digest:" << digest << std::endl;
-    std::time_t now = std::time(NULL);
-    std::tm* ptm = std::localtime(&now);
-    std::chrono::system_clock::time_point exp = std::chrono::system_clock::from_time_t(1656559384);
-    /*auto token = jwt::create()
-        //.set_issuer("auth0")
-        //.set_type("JWS")
-
-        .set_payload_claim("accountId", jwt::claim(std::string(account_id)))
-        .set_payload_claim("secretKeyId", jwt::claim(std::string(secret_key_id)))
-        .set_payload_claim("digest", jwt::claim(std::string(digest)))
-        .set_payload_claim("method", jwt::claim(std::string(method)))
-        //.set_payload_claim("exp", jwt::claim(std::chrono::system_clock::now() + std::chrono::seconds{ 36000 }))
-
-        //.set_issued_at(std::chrono::system_clock::now())
-        //.set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{ 300 })
-        .set_expires_at(exp)
-        .sign(jwt::algorithm::hs256{ secret_key });
-        std::cout << "token:" << token << std::endl;
-    */
-    using namespace jwt::params;
-    //auto key = "secret"; //Secret to use for the algorithm
-    //Create JWT object
-    jwt::jwt_object obj{ 
-        algorithm("HS256"), 
-        payload({
-            {"accountId", account_id},
-            {"secretKeyId", secret_key_id},
-            {"digest", digest},
-            {"method", method}         
-        }),
-        secret(secret_key) };
-    obj.add_claim("exp", std::chrono::system_clock::now() + std::chrono::seconds{ 300 });
-
-    //Get the encoded string/assertion
-    auto enc_str = obj.signature();
-    //std::cout << "enc_str: " << enc_str << std::endl;
-
-    //
-    //auto dec_obj = jwt::decode(enc_str, algorithms({ "HS256" }), secret(secret_key));
-    //std::cout << "dec_obj.header():" << dec_obj.header() << std::endl;
-    //std::cout << "dec_obj.payload():" << dec_obj.payload() << std::endl;
-    //jwt::jwt_object obj{ algorithm("HS256"), payload({{"some", "payload"}}), secret("secret")};
-    
-    auto token = enc_str;
-
-    return token;
-}
-
-static void split(const std::string& s, std::vector<std::string>& tokens, const std::string& delimiters = " ")
-{
-    std::string::size_type lastPos = s.find_first_not_of(delimiters, 0);
-    std::string::size_type pos = s.find_first_of(delimiters, lastPos);
-    while (std::string::npos != pos || std::string::npos != lastPos) {
-        tokens.push_back(s.substr(lastPos, pos - lastPos));
-        lastPos = s.find_first_not_of(delimiters, pos);
-        pos = s.find_first_of(delimiters, lastPos);
-    }
-}
-
-std::string generate_order_id(std::string accountId)
-{
-    std::vector<std::string> result;
-    split(accountId, result, "-");
-
-    //orderId if requested, should be composed of: account number + random number + 13 digit timestamp+3 digit random number. 
-    //Up to 64 digits.
-    
-    //std::cout << "split:" << result[1] << std::endl
-    std::cout << "now:" << std::chrono::system_clock::now().time_since_epoch().count()/1000 << std::endl;
-    //std::cout << "now:" << std::chrono::system_clock::now().time_since_epoch().count() / std::chrono::micro << std::endl;
-    auto currentTime = std::chrono::system_clock::now().time_since_epoch().count() / 10000;
-    std::random_device rd;
-    auto r = rd();
-    auto randomDigit = (r % 900) + 100;
-    std::cout << "countid:" << result[1] << std::endl;
-    std::cout << "currentTime:" << currentTime << std::endl;
-    std::cout << "randomDigit:" << randomDigit << std::endl;
-    std::string orderId = result[1] + std::to_string(currentTime) + std::to_string(randomDigit);
-    std::cout << "orderId:" << orderId << std::endl;
-    return orderId;
-    
 }
 
 void Application::onCreate( const FIX::SessionID& sessionID)
@@ -194,17 +69,6 @@ void Application::toAdmin( FIX::Message& message, const FIX::SessionID& sessionI
     
     if (message.getHeader().getField(FIX::FIELD::MsgType) == "A")
     {
-        std::string method = "Fix";
-        std::string account_id = ACCOUNT_ID;
-        std::string secret_key_id = SECRET_KEY_ID;
-        std::string params = ACCOUNT_ID;
-        std::string secret_key = SECRET_KEY;
-        auto signature = getSignature(method,
-            account_id,
-            secret_key_id,
-            params,
-            secret_key);
-
         message.setField(FIX::Username("xxx"));
         message.setField(FIX::Password("xxx"));
 
@@ -514,10 +378,11 @@ FIX::TimeInForce Application::queryTimeInForce()
   }
 }
 
-void Application::put_quote(FIX::Symbol, FIX::Currency currency, FIX::Side side, FIX::OrderQty quantity)
+void Application::put_quote(FIX::Symbol symbol, FIX::Currency currency, FIX::Side side, FIX::OrderQty quantity)
 {
-    FIX44::QuoteRequest quoteRequest(FIX::QuoteReqID("ddd"));
-    quoteRequest.set( FIX::Symbol( "BTC/USDT" ) );
+    FIX44::QuoteRequest quoteRequest;
+    quoteRequest.set( FIX::QuoteReqID("QuoteReqID") ); // String (max length 31 chars) Unique ID provided by the client [a-zA-Z0-9._-]
+    quoteRequest.set( FIX::Symbol( symbol ) );
     quoteRequest.set( FIX::Side( FIX::Side_BUY ) );
     quoteRequest.set( FIX::OrderQty( 1 ) );
 
@@ -544,10 +409,8 @@ void Application::put_order(FIX::QuoteID quoteid, FIX::Symbol symbol, FIX::Curre
     std::cout << "order utc:" << nowUtc << std::endl;
     //std::chrono::system_clock::now();
     //FIX::DateTime();
-    auto orderId = generate_order_id(ACCOUNT_ID);
     FIX::OrdType ordType;
-    std::cout << "orderId:" << orderId << std::endl;
-    FIX44::NewOrderSingle newOrderSingle();
+    FIX44::NewOrderSingle newOrderSingle;
     newOrderSingle.set( quoteid );
     newOrderSingle.set( symbol );
     newOrderSingle.set( side );
@@ -566,11 +429,15 @@ void Application::put_subscribe(FIX::Symbol symbol, bool subscribe)
 //    msg.setField(fix.SubscriptionRequestType('1' if subscribe else '0'))
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
-    FIX44::MarketDataRequest marketDataRequest();
-    marketDataRequest.set( FIX::MDReqID( 1 ) );
+    FIX44::MarketDataRequest marketDataRequest;
+    marketDataRequest.set( FIX::MDReqID( "MDReqID" ) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-]
     marketDataRequest.set( symbol );
-    marketDataRequest.set( FIX:SubscriptionRequestType('1') if subscribe else FIX:SubscriptionRequestType('0') );
-    FIX::Session::sendToTarget( newOrderSingle );
+    if (subscribe == true){
+        marketDataRequest.set(FIX::SubscriptionRequestType('1'));
+    } else {
+        marketDataRequest.set(FIX::SubscriptionRequestType('0'));
+    }
+    FIX::Session::sendToTarget( marketDataRequest );
 }
 
 // def put_position(self, currency:str, zeroPositions:bool, subscribe:bool):
@@ -583,12 +450,12 @@ void Application::put_position(FIX::Currency currency, bool zeroPositions, bool 
 //    msg.setField(fix.BoolField(100551, zeroPositions)) # ZeroPositions
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
-    FIX44::RequestForPositions requestForPositions();
-    marketDataRequest.set( FIX::PosReqID( 1 ) );
-    marketDataRequest.set( currency );
-    marketDataRequest.set( FIX::SubscriptionRequestType('1') if subscribe else FIX::SubscriptionRequestType('0') );
-    marketDataRequest.set( FIX::BoolField(100551, zeroPositions));
-    FIX::Session::sendToTarget( newOrderSingle );
+    FIX44::RequestForPositions requestForPositions;
+    requestForPositions.set( FIX::PosReqID( "PosReqID" ) ); // String (max 15 chars) ID provided by the client in position request message
+    requestForPositions.set( currency );
+    requestForPositions.set( FIX::SubscriptionRequestType('1') if subscribe else FIX::SubscriptionRequestType('0') );
+    requestForPositions.set( FIX::BoolField(100551, zeroPositions));
+    FIX::Session::sendToTarget( requestForPositions );
 }
 
 // def put_security(self, symbol:str):
@@ -600,9 +467,9 @@ void Application::put_security(FIX::Symbol symbol)
 //        msg.setField(fix.Symbol(symbol)) #55
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
-    FIX44::SecurityListRequest securityListRequest();
-    marketDataRequest.set( FIX::SecurityReqID( 1 ) );
-    marketDataRequest.set( symbol );
+    FIX44::SecurityListRequest securityListRequest;
+    securityListRequest.set( FIX::SecurityReqID( "SecurityReqID" ) ); // String (max 15 chars) Unique ID of this request provided by the client [a-zA-Z0-9._-]
+    securityListRequest.set( symbol );
     FIX::Session::sendToTarget( securityListRequest );
 }
 
@@ -616,14 +483,14 @@ void Application::put_change_password(FIX::Username change_username, FIX::Passwo
 //    msg.setField(fix.NewPassword(new_password))
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
-    FIX44::UserRequest userRequest();
-    userRequest.set( FIX::UserRequestID( 1 ) );
+    FIX44::UserRequest userRequest;
+    userRequest.set( FIX::UserRequestID( "UserRequestID" ) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-
     userRequest.set( FIX::UserRequestType( 3 ) );
     userRequest.set( change_username );
     userRequest.set( old_password );
     userRequest.set( new_password );
 
-    FIX::Session::sendToTarget( securityListRequest );
+    FIX::Session::sendToTarget( userRequest );
 }
 
 //def triger_logon_out(self):
@@ -631,6 +498,6 @@ void Application::triger_logon_out()
 {
 //    msg.getHeader().setField(fix.MsgType(fix.MsgType_Logout)) #35=5
 //    fix.Session.sendToTarget(msg, self.__sessionID)
-    FIX44::Logout logout();
+    FIX44::Logout logout;
     FIX::Session::sendToTarget( logout );
 }
