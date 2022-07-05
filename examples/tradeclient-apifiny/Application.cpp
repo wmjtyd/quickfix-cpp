@@ -41,7 +41,7 @@ std::string ACCOUNT_ID = "";
 std::string SECRET_KEY_ID = "";
 std::string SECRET_KEY = "";
 std::string SYMBOL = "BTCUSDT";
-std::string VENUE = "FIX";  // choose exchange you want to trade
+std::string VENUE = "FTX";  // choose exchange you want to trade
 std::string SERVER = "fix.api.apifiny.com:1443";  //#use the right endpoint for each exchange
 std::string SenderCompID = ACCOUNT_ID;
 std::string TargetCompID = "APIFINY";
@@ -258,9 +258,10 @@ EXCEPT( FIX::DoNotSend )
 void Application::onMessage
 ( const FIX42::ExecutionReport& executionReport, const FIX::SessionID& sessionId) 
 {
-    auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    // auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto millisec_since_epoch = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << std::endl
-        << "ExecutionReport utc:" << nowUtc << std::endl
+        << "ExecutionReport utc:" << millisec_since_epoch << std::endl
         << "onMessage: FIX::SessionID:" << sessionId << std::endl
         << "onMessage: FIX42::ExecutionReport:" << executionReport << std::endl;
 }
@@ -274,8 +275,17 @@ void Application::run()
   {
     try
     {
-      char action = queryAction();
-        NewOrderSingle();
+        char action = queryAction();
+        if ( action == '1' )
+            NewOrderSingle();
+//        else if ( action == '2' )
+//            queryCancelOrder();
+//        else if ( action == '3' )
+//            queryReplaceOrder();
+//        else if ( action == '4' )
+//            queryMarketDataRequest();
+//        else if ( action == '5' )
+//            break;
     }
     catch ( std::exception & e )
     {
@@ -286,8 +296,9 @@ void Application::run()
 
 void Application::NewOrderSingle()
 {
-  auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  std::cout << "order utc:" << nowUtc << std::endl;
+  // auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  auto millisec_since_epoch = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  std::cout << "order utc:" << millisec_since_epoch << std::endl;
   //std::chrono::system_clock::now();
   //FIX::DateTime();
   auto orderId = generate_order_id(ACCOUNT_ID);
