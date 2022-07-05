@@ -42,7 +42,7 @@ std::string SECRET_KEY_ID = "";
 std::string SECRET_KEY = "";
 std::string SYMBOL = "BTCUSDT";
 std::string VENUE = "FTX";  // choose exchange you want to trade
-std::string SERVER = "fix.api.apifiny.com:1443";  //#use the right endpoint for each exchange
+std::string SERVER = "fixapiftx.apifiny.com:1443";  //#use the right endpoint for each exchange
 std::string SenderCompID = ACCOUNT_ID;
 std::string TargetCompID = "APIFINY";
 
@@ -160,7 +160,7 @@ std::string generate_order_id(std::string accountId)
     //std::cout << "split:" << result[1] << std::endl
     std::cout << "now:" << std::chrono::system_clock::now().time_since_epoch().count()/1000 << std::endl;
     //std::cout << "now:" << std::chrono::system_clock::now().time_since_epoch().count() / std::chrono::micro << std::endl;
-    auto currentTime = std::chrono::system_clock::now().time_since_epoch().count() / 10000;
+    auto currentTime = std::chrono::system_clock::now().time_since_epoch().count() / 1000;
     std::random_device rd;
     auto r = rd();
     auto randomDigit = (r % 900) + 100;
