@@ -149,9 +149,7 @@ private:
   FIX::TimeInForce queryTimeInForce();
 
   void NewOrderSingle();
-  void CancelOrder(FIX::OrigClOrdID& aOrigClOrdID, FIX::ClOrdID& aClOrdID,
-                   FIX::Symbol symbol, FIX::Currency currency,
-                   FIX::Side side, FIX::OrderQty quantity, FIX::Price price, FIX::TimeInForce time_in_force);
+  void CancelOrder(FIX::ClOrdID& aClOrdID);
 
 };
 

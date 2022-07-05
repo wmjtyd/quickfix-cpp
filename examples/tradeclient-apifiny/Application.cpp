@@ -258,7 +258,9 @@ EXCEPT( FIX::DoNotSend )
 void Application::onMessage
 ( const FIX42::ExecutionReport& executionReport, const FIX::SessionID& sessionId) 
 {
+    auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::cout << std::endl
+        << "ExecutionReport utc:" << nowUtc << std::endl
         << "onMessage: FIX::SessionID:" << sessionId << std::endl
         << "onMessage: FIX42::ExecutionReport:" << executionReport << std::endl;
 }
@@ -273,6 +275,7 @@ void Application::run()
     try
     {
       char action = queryAction();
+        NewOrderSingle();
     }
     catch ( std::exception & e )
     {
@@ -330,9 +333,7 @@ void Application::NewOrderSingle()
   FIX::Session::sendToTarget( newOrderSingle );
 }
 
-void Application::CancelOrder(FIX::OrigClOrdID& aOrigClOrdID, FIX::ClOrdID& aClOrdID,
-                              FIX::Symbol symbol, FIX::Currency currency,
-                              FIX::Side side, FIX::OrderQty quantity, FIX::Price price, FIX::TimeInForce time_in_force)
+void Application::CancelOrder(FIX::ClOrdID& aClOrdID)
 {
     auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::cout << "order utc:" << nowUtc << std::endl;
@@ -342,13 +343,11 @@ void Application::CancelOrder(FIX::OrigClOrdID& aOrigClOrdID, FIX::ClOrdID& aClO
     //    207	SecurityExchange	VENUE
     //    58	Text	Free format text string
 
-    FIX42::OrderCancelRequest orderCancelRequest(aOrigClOrdID, aClOrdID, symbol, side,
-                                                 FIX::TransactTime() );
-//    orderCancelRequest.set(orderid);
+    FIX42::OrderCancelRequest orderCancelRequest;
+    orderCancelRequest.set(aClOrdID);
     orderCancelRequest.set(FIX::Account(ACCOUNT_ID));
     orderCancelRequest.set(FIX::SecurityExchange(VENUE));
-//
-//    FIX::Session::sendToTarget( newOrderSingle );
+    FIX::Session::sendToTarget(orderCancelRequest );
 }
 
 void Application::queryHeader( FIX::Header& header )
