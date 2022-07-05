@@ -330,7 +330,9 @@ void Application::NewOrderSingle()
   FIX::Session::sendToTarget( newOrderSingle );
 }
 
-void Application::CancelOrder()
+void Application::CancelOrder(FIX::OrigClOrdID& aOrigClOrdID, FIX::ClOrdID& aClOrdID,
+                              FIX::Symbol symbol, FIX::Currency currency,
+                              FIX::Side side, FIX::OrderQty quantity, FIX::Price price, FIX::TimeInForce time_in_force)
 {
     auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::cout << "order utc:" << nowUtc << std::endl;
@@ -340,10 +342,11 @@ void Application::CancelOrder()
     //    207	SecurityExchange	VENUE
     //    58	Text	Free format text string
 
-    FIX42::OrderCancelRequest orderCancelRequest();
-//  TODO   newOrderSingle.set(FIX::ClOrdID("ClOrdID"));
-//    newOrderSingle.set(FIX::Account(ACCOUNT_ID));
-//    newOrderSingle.set(FIX::SecurityExchange(VENUE));
+    FIX42::OrderCancelRequest orderCancelRequest(aOrigClOrdID, aClOrdID, symbol, side,
+                                                 FIX::TransactTime() );
+//    orderCancelRequest.set(orderid);
+    orderCancelRequest.set(FIX::Account(ACCOUNT_ID));
+    orderCancelRequest.set(FIX::SecurityExchange(VENUE));
 //
 //    FIX::Session::sendToTarget( newOrderSingle );
 }
