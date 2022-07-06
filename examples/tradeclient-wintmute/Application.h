@@ -61,7 +61,9 @@
 #include "quickfix/fix44/QuoteRequest.h"
 #include "quickfix/fix44/RequestForPositions.h"
 #include "quickfix/fix44/SecurityListRequest.h"
+#include "quickfix/fix44/SecurityList.h"
 #include "quickfix/fix44/UserRequest.h"
+#include "quickfix/fix44/UserResponse.h"
 #include "quickfix/fix44/Logout.h"
 
 
@@ -73,6 +75,7 @@
 #include "quickfix/fix50/OrderCancelReject.h"
 #include "quickfix/fix50/OrderCancelReplaceRequest.h"
 #include "quickfix/fix50/MarketDataRequest.h"
+#include "quickfix/fix50/SecurityList.h"
 
 #include <queue>
 
@@ -110,7 +113,8 @@ private:
   void onMessage( const FIX44::OrderCancelReject&, const FIX::SessionID& );
   void onMessage( const FIX44::MarketDataSnapshotFullRefresh&, const FIX::SessionID& );
   void onMessage( const FIX44::PositionReport&, const FIX::SessionID& );
-
+  void onMessage(const FIX44::SecurityList &, const FIX::SessionID &);
+  void onMessage(const FIX44::UserResponse &, const FIX::SessionID &);
 
     /*void onMessage( const FIX50::ExecutionReport&, const FIX::SessionID& );
   void onMessage( const FIX50::OrderCancelReject&, const FIX::SessionID& );*/
