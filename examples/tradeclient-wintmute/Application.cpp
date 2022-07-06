@@ -70,8 +70,8 @@ void Application::toAdmin( FIX::Message& message, const FIX::SessionID& sessionI
     
     if (message.getHeader().getField(FIX::FIELD::MsgType) == "A")
     {
-        message.setField(FIX::Username("xxx"));
-        message.setField(FIX::Password("xxx"));
+        message.setField(FIX::Username(""));
+        message.setField(FIX::Password(""));
 
         if (true == message.isSetField(FIX::FIELD::ResetSeqNumFlag))
         {
@@ -202,13 +202,13 @@ void Application::run()
             put_order(FIX::QuoteID("QuoteReqID"), FIX::Symbol( "USDT/USD" ), FIX::Currency( "USDT/USD" ),
                       FIX::Side_BUY, FIX::OrderQty( 1 ), FIX::Price( 1 ), FIX::TimeInForce_IMMEDIATE_OR_CANCEL);
         else if ( action == '3' )
-            put_subscribe(FIX::Symbol( "USDT/USD" ), true)
+            put_subscribe(FIX::Symbol( "USDT/USD" ), true);
         else if ( action == '4' )
-            put_position(FIX::Currency( "USDT/USD" ), false, true)
+            put_position(FIX::Currency( "USDT/USD" ), false, true);
         else if ( action == '5' )
-            put_security(FIX::Symbol( "USDT/USD" ))
+            put_security(FIX::Symbol( "USDT/USD" ));
         else if ( action == '6' )
-            put_change_password(FIX::Username(""), FIX::Password(""), FIX::Password(""))
+            put_change_password(FIX::Username(""), FIX::Password(""), FIX::Password(""));
         else if ( action == '7' )
             break;
     }
