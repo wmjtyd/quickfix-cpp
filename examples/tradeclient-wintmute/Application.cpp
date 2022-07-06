@@ -141,37 +141,53 @@ EXCEPT( FIX::DoNotSend )
 // Quote Response
 void Application::onMessage
 ( const FIX44::Quote& quote, const FIX::SessionID& sessionId) {
-//    std::cout << std::endl
-//              << "onMessage: FIX::SessionID:" << sessionId << std::endl
-//              << "onMessage: FIX42::quote:" << quote << std::endl;
+    std::cout << std::endl
+              << "onMessage: FIX::SessionID:" << sessionId << std::endl
+              << "onMessage: FIX42::quote:" << quote << std::endl;
 }
 // MarketDataSnapshotFullRefresh
 void Application::onMessage
-( const FIX44::MarketDataSnapshotFullRefresh&, const FIX::SessionID& ) {}
+( const FIX44::MarketDataSnapshotFullRefresh& marketDataSnapshotFullRefresh, const FIX::SessionID& sessionId) {
+    std::cout << std::endl
+              << "onMessage: FIX::SessionID:" << sessionId << std::endl
+              << "onMessage: FIX42::marketDataSnapshotFullRefresh:" << marketDataSnapshotFullRefresh << std::endl;
+}
 
 // ExecutionReport
 void Application::onMessage
 ( const FIX44::ExecutionReport& executionReport, const FIX::SessionID& sessionId) {
     std::cout << std::endl
     << "onMessage: FIX::SessionID:" << sessionId << std::endl
-    << "onMessage: FIX42::ExecutionReport:" << executionReport. << std::endl;
+    << "onMessage: FIX42::ExecutionReport:" << executionReport << std::endl;
 }
 // OrderCancelReject
 void Application::onMessage
-( const FIX44::OrderCancelReject&, const FIX::SessionID& ) {}
+( const FIX44::OrderCancelReject& orderCancelReject, const FIX::SessionID& sessionId) {
+    std::cout << std::endl
+              << "onMessage: FIX::SessionID:" << sessionId << std::endl
+              << "onMessage: FIX42::orderCancelReject:" << orderCancelReject << std::endl;
+}
 // PositionReport
 void Application::onMessage
 ( const FIX44::PositionReport& positionReport, const FIX::SessionID& sessionId) {
-//    std::cout << std::endl
-//              << "onMessage: FIX::SessionID:" << sessionId << std::endl
-//              << "onMessage: FIX42::positionReport:" << positionReport << std::endl;
+    std::cout << std::endl
+              << "onMessage: FIX::SessionID:" << sessionId << std::endl
+              << "onMessage: FIX42::positionReport:" << positionReport << std::endl;
 }
 // SecurityList
 void Application::onMessage
-( const FIX44::SecurityList&, const FIX::SessionID& ) {}
+( const FIX44::SecurityList& securityList, const FIX::SessionID& sessionId) {
+    std::cout << std::endl
+              << "onMessage: FIX::SessionID:" << sessionId << std::endl
+              << "onMessage: FIX42::securityList:" << securityList << std::endl;
+}
 // change_password
 void Application::onMessage
-( const FIX44::UserResponse&, const FIX::SessionID& ) {}
+( const FIX44::UserResponse& userResponse, const FIX::SessionID& sessionId) {
+    std::cout << std::endl
+              << "onMessage: FIX::SessionID:" << sessionId << std::endl
+              << "onMessage: FIX42::userResponse:" << userResponse << std::endl;
+}
 
 void Application::run()
 {
