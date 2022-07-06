@@ -4,7 +4,8 @@ endif()
 
 add_executable(tradeclient-wintmute Application.cpp tradeclient.cpp ${applink_SOURCE})
 
-target_include_directories(tradeclient-wintmute PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/quickfix ${CMAKE_SOURCE_DIR})
+target_include_directories(tradeclient-wintmute PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/quickfix ${CMAKE_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/examples/tradeclient-wintmute/lib/snowflake-cpp)
 
 
 target_link_libraries(tradeclient-wintmute ${PROJECT_NAME})

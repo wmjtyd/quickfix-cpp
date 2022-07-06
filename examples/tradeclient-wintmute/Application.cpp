@@ -33,6 +33,11 @@
 #include <random>
 #include <chrono>
 
+
+std::string SYMBOL = "BTCUSDT";
+std::string Currency = "USD";
+
+
 //const std::string __SOH__2 = "";
 const std::string __SOH__ = std::string("\x01");
 void replace_str(std::string& str, const std::string& before, const std::string& after)
@@ -46,6 +51,10 @@ void replace_str(std::string& str, const std::string& before, const std::string&
         else
             break;
     }
+}
+Application::Application()
+{
+    mUUID.init(1, 1);
 }
 
 void Application::onCreate( const FIX::SessionID& sessionID)
@@ -195,7 +204,14 @@ void Application::run()
   {
     try
     {
-      char action = queryAction();
+      char action = queryTestAction();
+        if ( action == '1' )
+        {
+            put_order(FIX::QuoteID(generateID()), FIX::Symbol(SYMBOL),
+                      FIX::Currency(Currency),
+                    FIX::Side(FIX::Side_BUY), FIX::OrderQty(1), FIX::Price(1),
+                    FIX::TimeInForce(FIX::TimeInForce_IMMEDIATE_OR_CANCEL));
+        }
     }
     catch ( std::exception & e )
     {
@@ -231,6 +247,21 @@ char Application::queryAction()
     default: throw std::exception();
   }
   return value;
+}
+
+char Application::queryTestAction()
+{
+    char value;
+    std::cout << std::endl
+              << "1) Enter Order" << std::endl
+              << "Action: ";
+    std::cin >> value;
+    switch ( value )
+    {
+        case '1': break;
+        default: throw std::exception();
+    }
+    return value;
 }
 
 int Application::queryVersion()
@@ -547,3 +578,12 @@ void Application::triger_logon_out()
     FIX44::Logout logout;
     FIX::Session::sendToTarget( logout );
 }
+
+
+
+//
+std::string Application::generateID()
+{
+    return std::to_string(mUUID.nextid());
+}
+
