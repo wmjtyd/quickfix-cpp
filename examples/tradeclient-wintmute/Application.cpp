@@ -70,20 +70,20 @@ void Application::toAdmin( FIX::Message& message, const FIX::SessionID& sessionI
     
     if (message.getHeader().getField(FIX::FIELD::MsgType) == "A")
     {
-        message.setField(FIX::Username(""));
-        message.setField(FIX::Password(""));
+        message.getHeader().setField(FIX::Username(""));
+        message.getHeader().setField(FIX::Password(""));
 
         if (true == message.isSetField(FIX::FIELD::ResetSeqNumFlag))
         {
             std::cout << "Sending admin: Logging in user" << message.getHeader().getField(FIX::FIELD::Username)
-                << "reset seq" << message.getHeader().getField(FIX::FIELD::ResetSeqNumFlag)
-                << "at" << message.getHeader().getField(FIX::FIELD::SendingTime)
-                << "seq" << message.getHeader().getField(FIX::FIELD::MsgSeqNum)
+//                << "reset seq" << message.getHeader().getField(FIX::FIELD::ResetSeqNumFlag)
+//                << "at" << message.getHeader().getField(FIX::FIELD::SendingTime)
+//                << "seq" << message.getHeader().getField(FIX::FIELD::MsgSeqNum)
                 << "for session" << sessionID << std::endl;
         }
-        else 
+        else
         {
-            std::cout << "Sending admin: Logging in user" << message.getHeader().getField(FIX::FIELD::Username)               
+            std::cout << "Sending admin: Logging in user" << message.getHeader().getField(FIX::FIELD::Username)
                 << "at" << message.getHeader().getField(FIX::FIELD::SendingTime)
                 << "seq" << message.getHeader().getField(FIX::FIELD::MsgSeqNum)
                 << "for session" << sessionID << std::endl;
@@ -121,7 +121,7 @@ EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FI
 void Application::toApp( FIX::Message& message, const FIX::SessionID& sessionID )
 EXCEPT( FIX::DoNotSend )
 {
-    std::cout << std::endl << "toApp: " << sessionID << std::endl;
+    std::cout << std::endl << "toApp: " << sessionID << "message" << message << std::endl;
   try
   {
     FIX::PossDupFlag possDupFlag;
@@ -475,24 +475,38 @@ void Application::put_order(FIX::QuoteID quoteid, FIX::Symbol symbol, FIX::Curre
 void Application::put_subscribe(FIX::Symbol symbol, bool subscribe)
 {
 //    msg = fix.Message()
+//    msg.getHeader().setField(fix.BeginString(fix.BeginString_FIX44)) #
+//    msg.getHeader().setField(fix.MsgType(fix.MsgType_MarketDataRequest)) #39=V
 //    msg.setField(fix.MDReqID(str(self.__genMDReqID())))
 //    msg.setField(fix.Symbol(symbol)) #55
 //    msg.setField(fix.SubscriptionRequestType('1' if subscribe else '0'))
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
-    FIX44::MarketDataRequest marketDataRequest;
-    marketDataRequest.set( FIX::MDReqID( "MDReqID" ) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-]
-
-    FIX44::MarketDataRequest::NoRelatedSym symbolGroup;
-    symbolGroup.set( symbol );
-    marketDataRequest.addGroup( symbolGroup );
-
+    FIX::Message message;
+    message.getHeader().setField(FIX::BeginString(FIX::BeginString_FIX44));
+    message.getHeader().setField(FIX::MsgType(FIX::MsgType_MarketDataRequest)); // 39=AN
+    message.setField(FIX::MDReqID( "MDReqID" ));
+    message.setField(symbol);
     if (subscribe == true){
-        marketDataRequest.set(FIX::SubscriptionRequestType('1'));
+        message.setField(FIX::SubscriptionRequestType('1'));
     } else {
-        marketDataRequest.set(FIX::SubscriptionRequestType('0'));
+        message.setField(FIX::SubscriptionRequestType('0'));
     }
-    FIX::Session::sendToTarget( marketDataRequest );
+    FIX::Session::sendToTarget( message );
+
+//    FIX44::MarketDataRequest marketDataRequest;
+//    marketDataRequest.set( FIX::MDReqID( "MDReqID" ) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-]
+//
+//    FIX44::MarketDataRequest::NoRelatedSym symbolGroup;
+//    symbolGroup.set( symbol );
+//    marketDataRequest.addGroup( symbolGroup );
+//
+//    if (subscribe == true){
+//        marketDataRequest.set(FIX::SubscriptionRequestType('1'));
+//    } else {
+//        marketDataRequest.set(FIX::SubscriptionRequestType('0'));
+//    }
+//    FIX::Session::sendToTarget( marketDataRequest );
 }
 
 // def put_position(self, currency:str, zeroPositions:bool, subscribe:bool):
