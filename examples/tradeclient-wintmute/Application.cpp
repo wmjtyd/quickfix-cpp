@@ -386,8 +386,13 @@ void Application::put_quote(FIX::Symbol symbol, FIX::Currency currency, FIX::Sid
     FIX44::QuoteRequest quoteRequest;
     quoteRequest.set( FIX::QuoteReqID("QuoteReqID") ); // String (max length 31 chars) Unique ID provided by the client [a-zA-Z0-9._-]
     /*quoteRequest.set( FIX::Symbol( symbol ) );
-    quoteRequest.set( FIX::Side( FIX::Side_BUY ) );
-    quoteRequest.set( FIX::OrderQty( 1 ) );*/
+      quoteRequest.set( FIX::Side( FIX::Side_BUY ) );
+      quoteRequest.set( FIX::OrderQty( 1 ) );*/
+    FIX44::QuoteRequest::NoRelatedSym noRelatedSym;
+    noRelatedSym.set( FIX::Symbol( symbol ) );
+    noRelatedSym.set( side );
+    noRelatedSym.set( quantity );
+    quoteRequest.addGroup(noRelatedSym);
 
     FIX::Session::sendToTarget( quoteRequest );
 }
@@ -408,7 +413,7 @@ void Application::put_order(FIX::QuoteID quoteid, FIX::Symbol symbol, FIX::Curre
 //    msg.setField(fix.OrderQty(quantity)) #38=100
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
-    auto nowUtc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto nowUtc = std::chrono::system_clock::now().time_since_epoch().count() / 1000;
     std::cout << "order utc:" << nowUtc << std::endl;
     //std::chrono::system_clock::now();
     //FIX::DateTime();
@@ -434,7 +439,11 @@ void Application::put_subscribe(FIX::Symbol symbol, bool subscribe)
 
     FIX44::MarketDataRequest marketDataRequest;
     marketDataRequest.set( FIX::MDReqID( "MDReqID" ) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-]
-    // TODO DENGJIN marketDataRequest.set( symbol );
+
+    FIX44::MarketDataRequest::NoRelatedSym symbolGroup;
+    symbolGroup.set( symbol );
+    marketDataRequest.addGroup( symbolGroup );
+
     if (subscribe == true){
         marketDataRequest.set(FIX::SubscriptionRequestType('1'));
     } else {
@@ -453,12 +462,19 @@ void Application::put_position(FIX::Currency currency, bool zeroPositions, bool 
 //    msg.setField(fix.BoolField(100551, zeroPositions)) # ZeroPositions
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
-    FIX44::RequestForPositions requestForPositions;
-    requestForPositions.set( FIX::PosReqID( "PosReqID" ) ); // String (max 15 chars) ID provided by the client in position request message
-    requestForPositions.set( currency );
-    requestForPositions.set( FIX::SubscriptionRequestType('1')); // if subscribe else FIX::SubscriptionRequestType('0') );
-//    requestForPositions.set( FIX::BoolField(100551, zeroPositions));
-//    FIX::Session::sendToTarget( requestForPositions );
+    FIX::Message message;
+    message.getHeader().setField(FIX::BeginString(FIX::BeginString_FIX44));
+    message.getHeader().setField(FIX::MsgType(FIX::MsgType_RequestForPositions)); // 39=AN
+    message.setField(FIX::PosReqID( "PosReqID" ));
+    message.setField(currency);
+    if (subscribe == true){
+        message.setField( FIX::SubscriptionRequestType('1'));
+    } else {
+        message.setField( FIX::SubscriptionRequestType('0'));
+    }
+    message.setField( FIX::BoolField(100551, zeroPositions));
+
+    FIX::Session::sendToTarget( message );
 }
 
 // def put_security(self, symbol:str):
