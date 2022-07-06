@@ -195,7 +195,22 @@ void Application::run()
   {
     try
     {
-      char action = queryAction();
+        char action = queryAction();
+        if ( action == '1' )
+            put_quote(FIX::Symbol( "USDT/USD" ), FIX::Currency( "USDT/USD" ), FIX::Side_BUY, FIX::OrderQty( 1 ));
+        else if ( action == '2' )
+            put_order(FIX::QuoteID("QuoteReqID"), FIX::Symbol( "USDT/USD" ), FIX::Currency( "USDT/USD" ),
+                      FIX::Side_BUY, FIX::OrderQty( 1 ), FIX::Price( 1 ), FIX::TimeInForce_IMMEDIATE_OR_CANCEL);
+        else if ( action == '3' )
+            put_subscribe(FIX::Symbol( "USDT/USD" ), true)
+        else if ( action == '4' )
+            put_position(FIX::Currency( "USDT/USD" ), false, true)
+        else if ( action == '5' )
+            put_security(FIX::Symbol( "USDT/USD" ))
+        else if ( action == '6' )
+            put_change_password(FIX::Username(""), FIX::Password(""), FIX::Password(""))
+        else if ( action == '7' )
+            break;
     }
     catch ( std::exception & e )
     {
@@ -217,17 +232,18 @@ char Application::queryAction()
 {
   char value;
   std::cout << std::endl
-  << "1) Enter Order" << std::endl
-  << "2) Cancel Order" << std::endl
-  << "3) Replace Order" << std::endl
-  << "4) Market data test" << std::endl
-  << "5) test" << std::endl
-  << "6) Quit" << std::endl
+  << "1) put_quote" << std::endl
+  << "2) put_order" << std::endl
+  << "3) put_subscribe" << std::endl
+  << "4) put_position" << std::endl
+  << "5) put_security" << std::endl
+  << "6) put_change_password" << std::endl
+  << "7) Quit" << std::endl
   << "Action: ";
   std::cin >> value;
   switch ( value )
   {
-    case '1': case '2': case '3': case '4': case '5': case '6': break;
+    case '1': case '2': case '3': case '4': case '5': case '6': case '7':break;
     default: throw std::exception();
   }
   return value;
