@@ -33,6 +33,9 @@
 #include <random>
 #include <chrono>
 
+std::string SenderCompID = "";
+std::string TargetCompID = "";
+
 //const std::string __SOH__2 = "";
 const std::string __SOH__ = std::string("\x01");
 void replace_str(std::string& str, const std::string& before, const std::string& after)
@@ -492,6 +495,11 @@ void Application::put_subscribe(FIX::Symbol symbol, bool subscribe)
     } else {
         message.setField(FIX::SubscriptionRequestType('0'));
     }
+
+    FIX::Header& header = message.getHeader();
+    header.setField( FIX::SenderCompID(SenderCompID) );
+    header.setField( FIX::TargetCompID(TargetCompID) );
+
     FIX::Session::sendToTarget( message );
 
 //    FIX44::MarketDataRequest marketDataRequest;
