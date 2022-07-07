@@ -463,6 +463,10 @@ void Application::put_quote(FIX::Symbol symbol, FIX::Currency currency, FIX::Sid
     noRelatedSym.set( quantity );
     quoteRequest.addGroup(noRelatedSym);
 
+    FIX::Header& header = quoteRequest.getHeader();
+    header.setField( FIX::SenderCompID(SenderCompID) );
+    header.setField( FIX::TargetCompID(TargetCompID) );
+
     FIX::Session::sendToTarget( quoteRequest );
 }
 
@@ -494,6 +498,10 @@ void Application::put_order(FIX::QuoteID quoteid, FIX::Symbol symbol, FIX::Curre
     newOrderSingle.set( price );
     newOrderSingle.set( time_in_force );
     newOrderSingle.set( FIX::OrderQty( 1 ) );
+
+    FIX::Header& header = newOrderSingle.getHeader();
+    header.setField( FIX::SenderCompID(SenderCompID) );
+    header.setField( FIX::TargetCompID(TargetCompID) );
 
     FIX::Session::sendToTarget( newOrderSingle );
 }
@@ -562,6 +570,10 @@ void Application::put_position(FIX::Currency currency, bool zeroPositions, bool 
     }
     message.setField( FIX::BoolField(100551, zeroPositions));
 
+    FIX::Header& header = message.getHeader();
+    header.setField( FIX::SenderCompID(SenderCompID) );
+    header.setField( FIX::TargetCompID(TargetCompID) );
+
     FIX::Session::sendToTarget( message );
 }
 
@@ -577,6 +589,11 @@ void Application::put_security(FIX::Symbol symbol)
     FIX44::SecurityListRequest securityListRequest;
     securityListRequest.set( FIX::SecurityReqID(generateID()) ); // String (max 15 chars) Unique ID of this request provided by the client [a-zA-Z0-9._-]
     securityListRequest.set( symbol );
+
+    FIX::Header& header = securityListRequest.getHeader();
+    header.setField( FIX::SenderCompID(SenderCompID) );
+    header.setField( FIX::TargetCompID(TargetCompID) );
+
     FIX::Session::sendToTarget( securityListRequest );
 }
 
@@ -597,6 +614,10 @@ void Application::put_change_password(FIX::Username change_username, FIX::Passwo
     userRequest.set( old_password );
     userRequest.set( new_password );
 
+    FIX::Header& header = userRequest.getHeader();
+    header.setField( FIX::SenderCompID(SenderCompID) );
+    header.setField( FIX::TargetCompID(TargetCompID) );
+
     FIX::Session::sendToTarget( userRequest );
 }
 
@@ -606,6 +627,11 @@ void Application::triger_logon_out()
 //    msg.getHeader().setField(fix.MsgType(fix.MsgType_Logout)) #35=5
 //    fix.Session.sendToTarget(msg, self.__sessionID)
     FIX44::Logout logout;
+
+    FIX::Header& header = logout.getHeader();
+    header.setField( FIX::SenderCompID(SenderCompID) );
+    header.setField( FIX::TargetCompID(TargetCompID) );
+
     FIX::Session::sendToTarget( logout );
 }
 
