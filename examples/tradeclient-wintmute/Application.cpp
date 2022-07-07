@@ -81,8 +81,8 @@ void Application::toAdmin( FIX::Message& message, const FIX::SessionID& sessionI
     
     if (message.getHeader().getField(FIX::FIELD::MsgType) == "A")
     {
-        message.getHeader().setField(FIX::Username("apifiny"));
-        message.getHeader().setField(FIX::Password("0XfUiAEZlzMynR"));
+        message.getHeader().setField(FIX::Username(""));
+        message.getHeader().setField(FIX::Password(""));
 
         if (true == message.isSetField(FIX::FIELD::ResetSeqNumFlag))
         {
