@@ -33,8 +33,12 @@
 #include <random>
 #include <chrono>
 
+
+std::string SYMBOL = "BTC/USDT";
+std::string Currency = "USD";
 std::string SenderCompID = "";
 std::string TargetCompID = "";
+
 
 //const std::string __SOH__2 = "";
 const std::string __SOH__ = std::string("\x01");
@@ -49,6 +53,10 @@ void replace_str(std::string& str, const std::string& before, const std::string&
         else
             break;
     }
+}
+Application::Application()
+{
+    mUUID.init(1, 1);
 }
 
 void Application::onCreate( const FIX::SessionID& sessionID)
@@ -202,7 +210,7 @@ void Application::run()
         if ( action == '1' )
             put_quote(FIX::Symbol( "USDT/USD" ), FIX::Currency( "USDT/USD" ), FIX::Side_BUY, FIX::OrderQty( 1 ));
         else if ( action == '2' )
-            put_order(FIX::QuoteID("QuoteReqID"), FIX::Symbol( "USDT/USD" ), FIX::Currency( "USDT/USD" ),
+            put_order(FIX::QuoteID(generateID()), FIX::Symbol( "USDT/USD" ), FIX::Currency( "USDT/USD" ),
                       FIX::Side_BUY, FIX::OrderQty( 1 ), FIX::Price( 1 ), FIX::TimeInForce_IMMEDIATE_OR_CANCEL);
         else if ( action == '3' )
             put_subscribe(FIX::Symbol( "USDT/USD" ), true);
@@ -250,6 +258,21 @@ char Application::queryAction()
     default: throw std::exception();
   }
   return value;
+}
+
+char Application::queryTestAction()
+{
+    char value;
+    std::cout << std::endl
+              << "1) Enter Order" << std::endl
+              << "Action: ";
+    std::cin >> value;
+    switch ( value )
+    {
+        case '1': break;
+        default: throw std::exception();
+    }
+    return value;
 }
 
 int Application::queryVersion()
@@ -430,7 +453,7 @@ FIX::TimeInForce Application::queryTimeInForce()
 void Application::put_quote(FIX::Symbol symbol, FIX::Currency currency, FIX::Side side, FIX::OrderQty quantity)
 {
     FIX44::QuoteRequest quoteRequest;
-    quoteRequest.set( FIX::QuoteReqID("QuoteReqID") ); // String (max length 31 chars) Unique ID provided by the client [a-zA-Z0-9._-]
+    quoteRequest.set( FIX::QuoteReqID(generateID()) ); // String (max length 31 chars) Unique ID provided by the client [a-zA-Z0-9._-]
     /*quoteRequest.set( FIX::Symbol( symbol ) );
       quoteRequest.set( FIX::Side( FIX::Side_BUY ) );
       quoteRequest.set( FIX::OrderQty( 1 ) );*/
@@ -488,7 +511,7 @@ void Application::put_subscribe(FIX::Symbol symbol, bool subscribe)
     FIX::Message message;
     message.getHeader().setField(FIX::BeginString(FIX::BeginString_FIX44));
     message.getHeader().setField(FIX::MsgType(FIX::MsgType_MarketDataRequest)); // 39=AN
-    message.setField(FIX::MDReqID( "MDReqID" ));
+    message.setField(FIX::MDReqID(generateID()));
     message.setField(symbol);
     if (subscribe == true){
         message.setField(FIX::SubscriptionRequestType('1'));
@@ -530,7 +553,7 @@ void Application::put_position(FIX::Currency currency, bool zeroPositions, bool 
     FIX::Message message;
     message.getHeader().setField(FIX::BeginString(FIX::BeginString_FIX44));
     message.getHeader().setField(FIX::MsgType(FIX::MsgType_RequestForPositions)); // 39=AN
-    message.setField(FIX::PosReqID( "PosReqID" ));
+    message.setField(FIX::PosReqID(generateID()));
     message.setField(currency);
     if (subscribe == true){
         message.setField( FIX::SubscriptionRequestType('1'));
@@ -552,7 +575,7 @@ void Application::put_security(FIX::Symbol symbol)
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
     FIX44::SecurityListRequest securityListRequest;
-    securityListRequest.set( FIX::SecurityReqID( "SecurityReqID" ) ); // String (max 15 chars) Unique ID of this request provided by the client [a-zA-Z0-9._-]
+    securityListRequest.set( FIX::SecurityReqID(generateID()) ); // String (max 15 chars) Unique ID of this request provided by the client [a-zA-Z0-9._-]
     securityListRequest.set( symbol );
     FIX::Session::sendToTarget( securityListRequest );
 }
@@ -568,7 +591,7 @@ void Application::put_change_password(FIX::Username change_username, FIX::Passwo
 //    fix.Session.sendToTarget(msg, self.__sessionID)
 
     FIX44::UserRequest userRequest;
-    userRequest.set( FIX::UserRequestID( "UserRequestID" ) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-
+    userRequest.set( FIX::UserRequestID(generateID()) ); // String (max 15 chars) Unique ID provided by the client [a-zA-Z0-9._-
     userRequest.set( FIX::UserRequestType( 3 ) );
     userRequest.set( change_username );
     userRequest.set( old_password );
@@ -585,3 +608,11 @@ void Application::triger_logon_out()
     FIX44::Logout logout;
     FIX::Session::sendToTarget( logout );
 }
+
+
+//
+std::string Application::generateID()
+{
+    return std::to_string(mUUID.nextid());
+}
+

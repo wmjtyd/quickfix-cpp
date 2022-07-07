@@ -82,14 +82,22 @@
 
 #include <queue>
 
+#include "snowflake.hpp"
+
+using snowflake_t = snowflake<1534832906275L,std::mutex>;
+
 class Application :
       public FIX::Application,
       public FIX::MessageCracker
 {
+private:
+    snowflake_t mUUID;
 public:
+  Application();
   void run();
 
 private:
+
   void onCreate( const FIX::SessionID& );
   void onLogon( const FIX::SessionID& sessionID );
   void onLogout( const FIX::SessionID& sessionID );
@@ -155,6 +163,8 @@ private:
   int queryVersion();
   bool queryConfirm( const std::string& query );
 
+  char queryTestAction();
+
   FIX::SenderCompID querySenderCompID();
   FIX::TargetCompID queryTargetCompID();
   FIX::TargetSubID queryTargetSubID();
@@ -188,6 +198,9 @@ private:
   //
   FIX44::NewOrderSingle NewOrderSingle44(FIX::QuoteID quoteid, FIX::Symbol symbol, FIX::Currency currency,
       FIX::Side side, FIX::OrderQty quantity, FIX::Price price, FIX::TimeInForce time_in_force, FIX::OrdType ordType);
+
+
+    std::string generateID();
 };
 
 #endif
