@@ -1,3 +1,5 @@
 add_subdirectory(executor)
 add_subdirectory(tradeclient)
 add_subdirectory(ordermatch)
+add_subdirectory(tradeclient-apifiny)
+add_subdirectory(tradeclient-wintmute)
