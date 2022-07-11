@@ -522,9 +522,9 @@ void Application::put_subscribe(FIX::Symbol symbol, bool subscribe)
     message.setField(FIX::MDReqID(generateID()));
     message.setField(symbol);
     if (subscribe == true){
-        message.setField(FIX::SubscriptionRequestType('1'));
+        message.setField(FIX::SubscriptionRequestType(FIX::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES)); //'1'
     } else {
-        message.setField(FIX::SubscriptionRequestType('0'));
+        message.setField(FIX::SubscriptionRequestType(FIX::SubscriptionRequestType_SNAPSHOT)); //'0'
     }
 
     FIX::Header& header = message.getHeader();
@@ -564,9 +564,9 @@ void Application::put_position(FIX::Currency currency, bool zeroPositions, bool 
     message.setField(FIX::PosReqID(generateID()));
     message.setField(currency);
     if (subscribe == true){
-        message.setField( FIX::SubscriptionRequestType('1'));
+        message.setField( FIX::SubscriptionRequestType(FIX::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES));
     } else {
-        message.setField( FIX::SubscriptionRequestType('0'));
+        message.setField( FIX::SubscriptionRequestType(FIX::SubscriptionRequestType_SNAPSHOT)); //'0'
     }
     message.setField( FIX::BoolField(100551, zeroPositions));
 
