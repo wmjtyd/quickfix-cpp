@@ -38,6 +38,8 @@
 
 #include "../../src/getopt-repl.h"
 
+#include "tradeclient.h"
+
 int main( int argc, char** argv )
 {
   if ( argc < 2 )
@@ -86,4 +88,20 @@ int main( int argc, char** argv )
     delete initiator;
     return 1;
   }
+}
+
+
+TradeClient* TradeClient::create_client()
+{
+    auto client = new(TradeClient);
+    return client;
+}
+
+void TradeClient::put_order(std::string quoteid, std::string symbol,
+               std::string currency,
+               int side,
+               int quantity,
+               int price, int time_in_force)
+{
+    return;
 }
