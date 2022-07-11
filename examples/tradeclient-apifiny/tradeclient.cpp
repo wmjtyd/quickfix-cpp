@@ -99,13 +99,77 @@ int main( int argc, char** argv )
   }
 }
 
-
-TradeClient* TradeClient::create_client()
+//filepath = filepath of fix42.xml, such as filepath = ./fix42.xml
+TradeClient* TradeClient::create_client(std::string filepath)
 {
-    auto client = new(TradeClient);
-    return client;
+    std::string file = filepath;
+
+#ifdef HAVE_SSL
+    std::string isSSL;
+  if (argc > 2)
+  {
+    isSSL.assign(argv[2]);
+  }
+#endif
+
+    FIX::Initiator * initiator = 0;
+    try
+    {
+        FIX::SessionSettings settings( file );
+
+        Application application;
+        FIX::FileStoreFactory storeFactory( settings );
+        FIX::ScreenLogFactory logFactory( settings );
+#ifdef HAVE_SSL
+        if (isSSL.compare("SSL") == 0)
+      initiator = new FIX::ThreadedSSLSocketInitiator ( application, storeFactory, settings, logFactory );
+    else if (isSSL.compare("SSL-ST") == 0)
+      initiator = new FIX::SSLSocketInitiator ( application, storeFactory, settings, logFactory );
+    else
+#endif
+        initiator = new FIX::SocketInitiator( application, storeFactory, settings, logFactory );
+
+//        initiator->start();
+//        application.run();
+//        initiator->stop();
+//        delete initiator;
+
+        auto client = new(TradeClient);
+        client->mApplication = &application;
+        client->mInitiator = initiator;
+        return client;
+    }
+    catch ( std::exception & e )
+    {
+        std::cout << e.what();
+        delete initiator;
+        return NULL;
+    }
+
+
 }
 
+int TradeClient::run()
+{
+    try
+    {
+
+        mInitiator->start();
+        mApplication->run();
+        mInitiator->stop();
+        delete mInitiator;
+        mInitiator = NULL;
+
+        return 0;
+    }
+    catch ( std::exception & e )
+    {
+        std::cout << e.what();
+        delete mInitiator;
+        mInitiator = NULL;
+        return 1;
+    }
+}
 void TradeClient::put_order(std::string quoteid, std::string symbol,
                             std::string currency,
                             int side,
