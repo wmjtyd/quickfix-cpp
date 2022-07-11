@@ -3,6 +3,7 @@ set(applink_SOURCE ${OPENSSL_INCLUDE_DIR}/openssl/applink.c)
 endif()
 
 add_executable(tradeclient-wintmute Application.cpp tradeclient.cpp ${applink_SOURCE})
+#add_library(tradeclient-wintmute STATIC Application.cpp tradeclient.cpp ${applink_SOURCE})
 
 target_include_directories(tradeclient-wintmute PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/quickfix ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/examples/tradeclient-wintmute/lib/snowflake-cpp)
